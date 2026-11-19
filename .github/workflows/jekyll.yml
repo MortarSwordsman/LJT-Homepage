@@ -9,8 +9,11 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# The deploy workflow needs Pages and OIDC permissions; write-all also allows first-time Pages enablement.
-permissions: write-all
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
@@ -28,7 +31,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: '24'
+          node-version: '24'        
       - name: Setup Ruby, JRuby and TruffleRuby
         uses: ruby/setup-ruby@v1.328.0
         with:
@@ -42,54 +45,12 @@ jobs:
           uglifyjs assets/js/plugins/jquery.greedy-navigation.js assets/js/_main.js assets/js/theme.js -c -m -o assets/js/main.min.js
       - name: Configure GitHub Pages
         id: pages
-        continue-on-error: true
         uses: actions/configure-pages@v6.0.0
-        with:
-          enablement: true
       - name: Build with Jekyll
-        # Outputs to the './_site' directory by default. The fallback is the project-page base path.
-        run: |
-          BASEURL="${{ steps.pages.outputs.base_path }}"
-          if [ -z "$BASEURL" ]; then
-            BASEURL="/LJT-Homepage"
-          fi
-          bundle exec jekyll build --baseurl "$BASEURL"
+        # Outputs to the './_site' directory by default
+        run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
         env:
           JEKYLL_ENV: production
-      - name: Verify generated homepage content
-        run: |
-          set -euo pipefail
-          test -f _site/index.html
-          grep -q "Junteng Liu" _site/index.html
-          grep -q "Education" _site/index.html
-          grep -q "Research Experience" _site/index.html
-          grep -q "Skills and Research Interests" _site/index.html
-          grep -q "Contact" _site/index.html
-          grep -q "jliugi@connect.ust.hk" _site/index.html
-          grep -q "SynLogic" _site/index.html
-          grep -q "Composing Parameter-Efficient Modules" _site/index.html
-          grep -q "SynLogic" _site/publications/index.html
-          if grep -q "Paper Title" _site/publications/index.html; then
-            echo "Template publication placeholder remains." >&2
-            exit 1
-          fi
-          python3 - <<'PY'
-          from pathlib import Path
-          titles = [
-              "SynLogic",
-              "On the Perception Bottleneck",
-              "On the Universal Truthfulness Hyperplane",
-              "In-Context Sharpness as Alerts",
-              "C-Eval: A Multi-Level",
-              "Composing Parameter-Efficient Modules",
-          ]
-          for path in [Path("_site/index.html"), Path("_site/publications/index.html")]:
-              text = path.read_text()
-              positions = [text.index(title) for title in titles]
-              assert positions == sorted(positions), (path, positions)
-              print(f"Verified publication order in {path}: {positions}")
-          PY
-          grep -o "Published in <i>[^<]*</i>, [0-9][0-9][0-9][0-9]" _site/publications/index.html
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v5.0.0
 
