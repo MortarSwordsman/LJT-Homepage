@@ -45,12 +45,18 @@ jobs:
           uglifyjs assets/js/plugins/jquery.greedy-navigation.js assets/js/_main.js assets/js/theme.js -c -m -o assets/js/main.min.js
       - name: Configure GitHub Pages
         id: pages
+        continue-on-error: true
         uses: actions/configure-pages@v6.0.0
         with:
           enablement: true
       - name: Build with Jekyll
-        # Outputs to the './_site' directory by default
-        run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
+        # Outputs to the './_site' directory by default. The fallback is the project-page base path.
+        run: |
+          BASEURL="${{ steps.pages.outputs.base_path }}"
+          if [ -z "$BASEURL" ]; then
+            BASEURL="/LJT-Homepage"
+          fi
+          bundle exec jekyll build --baseurl "$BASEURL"
         env:
           JEKYLL_ENV: production
       - name: Upload GitHub Pages artifact
