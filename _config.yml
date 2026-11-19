@@ -111,7 +111,7 @@ staticman:
       options:
         format           : "iso8601"
 atom_feed:
-  hide                   : false
+  hide                   : true
   path                   :
 
 # SEO Related
@@ -155,6 +155,7 @@ exclude:
   - .github
   - .jekyll-assets-cache
   - .sass-cache
+  - AGENTS.md
   - assets/js/_main.js
   - assets/js/plugins
   - assets/js/vendor
@@ -162,16 +163,24 @@ exclude:
   - Capfile
   - config
   - Dockerfile
+  - docker-compose.yaml
   - Gemfile
   - Gruntfile.js
   - gulpfile.js
+  - images/500x300.png
+  - images/bio-photo.jpg
+  - images/bio-photo-2.jpg
+  - images/editing-talk.png
+  - images/profile.png
+  - images/themes
+  - images/wiki
   - LICENSE
   - local
   - log
   - node_modules
   - package.json*
   - Rakefile
-  - README
+  - README.md
   - tmp
   - vendor
   - _drafts
